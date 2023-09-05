@@ -7,7 +7,7 @@ public class MouseListener {
     private double scrollX, scrollY;
     private double xPos, yPos, lastX, lastY;
     // Add catch in case there are more than 3 buttons (probably not worth covering more than this).
-    private boolean[] mouseButtonPressed = new boolean[3];
+    private final boolean[] mouseButtonPressed = new boolean[3];
     private boolean isDragging;
 
     private MouseListener() {

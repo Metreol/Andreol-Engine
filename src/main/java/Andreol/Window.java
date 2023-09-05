@@ -4,6 +4,9 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
+import util.Time;
+
+import java.sql.SQLOutput;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -17,6 +20,9 @@ public class Window {
     private String title;
     // This long is the address in memory where the window is.
     private long glfwWindow;
+    private float r, g, b, a;
+    private boolean fadeToBlack;
+    private double framesPerSecond;
 
     private static Window window = null;
 
@@ -24,6 +30,10 @@ public class Window {
         this.width = 1920;
         this.height = 1080;
         this.title = "MyGame";
+        this.r = 1;
+        this.g = 1;
+        this.b = 1;
+        this.a = 1;
     }
 
     public static Window get() {
@@ -63,9 +73,18 @@ public class Window {
             throw new IllegalStateException("Failed to create the GLFW Window.");
         }
 
+        glfwSetCursorPosCallback(glfwWindow, MouseListener::cursorPositionCallback);
+        glfwSetMouseButtonCallback(glfwWindow, MouseListener::mouseButtonCallback);
+        glfwSetScrollCallback(glfwWindow, MouseListener::scrollCallback);
+        glfwSetKeyCallback(glfwWindow, KeyListener::keyCallback);
+
         // Make the OpenGL context current
         glfwMakeContextCurrent(glfwWindow);
-        // Enable V-Sync - Means no restriction, no wait time between frames, goes as fast as we can.
+        //
+        // Very roughly the options are:
+        // 0 - Unlimited FPS, even beyond monitor/machine capability.
+        // 1 - Capped by monitor capability, but hits max if it can.
+        // >=2 - Half the monitors capability (Waits 2 Intervals for 2, 3 for 3 etc)
         glfwSwapInterval(1);
 
         // Make window visible
@@ -80,14 +99,33 @@ public class Window {
     }
 
     public void loop() {
+        double frameStartTime = Time.getTime();
+        double frameEndTime;
         while (!glfwWindowShouldClose(glfwWindow)) {
             // Poll events
             glfwPollEvents();
 
-            glClearColor(1f, 1f, 1f, 1f);
+            if (KeyListener.isKeyPressed(GLFW_KEY_SPACE)) {
+                fadeToBlack = true;
+                System.out.println(framesPerSecond);
+            }
+            if (fadeToBlack) {
+                r = Math.max(r - 0.01f, 0);
+                g = Math.max(g - 0.01f, 0);
+                b = Math.max(b - 0.01f, 0);
+            }
+
+            glClearColor(r, g, b, a);
             glClear(GL_COLOR_BUFFER_BIT);
 
             glfwSwapBuffers(glfwWindow);
+
+            frameEndTime = Time.getTime();
+            double deltaTime = frameEndTime - frameStartTime;
+            framesPerSecond = 1D / deltaTime;
+            // Better to set startTime here as any interrupts between frames will
+            // be included in calculations
+            frameStartTime = frameEndTime;
         }
    }
 
