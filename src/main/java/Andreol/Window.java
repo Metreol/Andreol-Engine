@@ -6,25 +6,26 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import util.Time;
 
-import java.sql.SQLOutput;
-
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 /*
-Most of this code is taken/adapted from the LWJGL Getting Started page: https://www.lwjgl.org/guide
+A lot of this code, namely init() and some of loop(), is taken/adapted from
+the LWJGL Getting Started page: https://www.lwjgl.org/guide
  */
 public class Window {
+    public float r, g, b, a;
+
     private int width, height;
     private String title;
     // This long is the address in memory where the window is.
     private long glfwWindow;
-    private float r, g, b, a;
     private boolean fadeToBlack;
     private double framesPerSecond;
 
     private static Window window = null;
+    private static Scene currentScene;
 
     private Window() {
         this.width = 1920;
@@ -34,6 +35,23 @@ public class Window {
         this.g = 1;
         this.b = 1;
         this.a = 1;
+    }
+
+    public static void changeScene(int sceneIndex) {
+        switch(sceneIndex) {
+            case 0:
+                currentScene = new LevelEditorScene();
+                // currentScene.init();
+                break;
+            case 1:
+                currentScene = new LevelScene();
+                // currentScene.init();
+                break;
+            default:
+                assert false : "Unknown scene index: " + sceneIndex;
+                System.out.printf("There is no scene type bound to index %s", sceneIndex);
+                break;
+        }
     }
 
     public static Window get() {
@@ -96,32 +114,33 @@ public class Window {
         // creates the GLCapabilities instance and makes the OpenGL
         // bindings available for use.
         GL.createCapabilities();
+
+        Window.changeScene(0);
     }
 
     public void loop() {
         double frameStartTime = Time.getTime();
         double frameEndTime;
+        double deltaTime = -1d;
         while (!glfwWindowShouldClose(glfwWindow)) {
             // Poll events
             glfwPollEvents();
 
             if (KeyListener.isKeyPressed(GLFW_KEY_SPACE)) {
-                fadeToBlack = true;
                 System.out.println(framesPerSecond);
-            }
-            if (fadeToBlack) {
-                r = Math.max(r - 0.01f, 0);
-                g = Math.max(g - 0.01f, 0);
-                b = Math.max(b - 0.01f, 0);
             }
 
             glClearColor(r, g, b, a);
             glClear(GL_COLOR_BUFFER_BIT);
 
+            if (deltaTime >= 0) {
+                currentScene.update(deltaTime);
+            }
+
             glfwSwapBuffers(glfwWindow);
 
             frameEndTime = Time.getTime();
-            double deltaTime = frameEndTime - frameStartTime;
+            deltaTime = frameEndTime - frameStartTime;
             framesPerSecond = 1D / deltaTime;
             // Better to set startTime here as any interrupts between frames will
             // be included in calculations
