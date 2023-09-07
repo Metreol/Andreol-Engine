@@ -1,3 +1,4 @@
+// Defining the Vertex shader
 #type vertex
 #version 330 core
 // - The 'a' prefix stands for attribute, as in vertex attribute.
@@ -14,4 +15,16 @@ void main() {
     // - The vector4 uses the 3 values from aPos and 1.0 as the
     // 4th value.
     gl_Position = vec4(aPos, 1.0);
+}
+
+// Defining the Fragment shader
+#type fragment
+#version 330 core
+
+in vec4 fColor;
+
+out vec4 color;
+
+void main() {
+    color = fColor;
 }
