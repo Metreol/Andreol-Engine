@@ -1,6 +1,7 @@
 package Andreol;
 
 import org.lwjgl.BufferUtils;
+import renderer.Shader;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -10,34 +11,6 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 public class LevelEditorScene extends Scene {
-
-    private String vertexShaderSrc = "#version 330 core\n" +
-            "// - The 'a' prefix stands for attribute, as in vertex attribute.\n" +
-            "layout (location=0) in vec3 aPos;\n" +
-            "layout (location=1) in vec4 aColor;\n" +
-            "\n" +
-            "// - The 'f' prefix stands for fragment, as this is passed to the\n" +
-            "// fragment shader.\n" +
-            "out vec4 fColor;\n" +
-            "\n" +
-            "void main() {\n" +
-            "    fColor = aColor;\n" +
-            "    // - gl_Position specifically MUST be defined.\n" +
-            "    // - The vector4 uses the 3 values from aPos and 1.0 as the\n" +
-            "    // 4th value.\n" +
-            "    gl_Position = vec4(aPos, 1.0);\n" +
-            "}";
-    private String fragmentShaderSrc = "#version 330 core\n" +
-            "\n" +
-            "in vec4 fColor;\n" +
-            "\n" +
-            "out vec4 color;\n" +
-            "\n" +
-            "void main() {\n" +
-            "    color = fColor;\n" +
-            "}";
-
-    private int vertexID, fragmentID, shaderProgramID;
 
     // This is the data we'll use to create the VBO: Vertex Buffer Object
     // - This defines the vertices in terms of their attributes (coordinates, color, etc)
@@ -78,6 +51,8 @@ public class LevelEditorScene extends Scene {
             0, 1, 3 // Bottom Left Triangle (Could this be 1,3,0 or 3,0,1?)
     };
 
+    private Shader defaultShader;
+
     private int vaoID, vboID, eboID;
 
     public LevelEditorScene() {
@@ -85,23 +60,6 @@ public class LevelEditorScene extends Scene {
     }
 
     public void init() {
-        // Compile Shaders
-        vertexID = compileShader(GL_VERTEX_SHADER, vertexShaderSrc);
-        fragmentID = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSrc);
-
-        // Link Shaders
-        shaderProgramID = glCreateProgram();
-        glAttachShader(shaderProgramID, vertexID);
-        glAttachShader(shaderProgramID, fragmentID);
-        glLinkProgram(shaderProgramID);
-        // Check for linking errors
-        if (glGetProgrami(shaderProgramID, GL_LINK_STATUS) == GL_FALSE) {
-            System.out.printf("ERROR: 'defaultShader.glsl'\n\tShader's '%s' linking failed.\n%s",
-                    glGetProgrami(shaderProgramID, GL_ATTACHED_SHADERS),
-                    glGetProgramInfoLog(shaderProgramID));
-            assert false : "";
-        }
-
         // ==========================================================
         // Generate VAO, VBO, and EBO buffer objects, and send to GPU
         // ==========================================================
@@ -145,29 +103,12 @@ public class LevelEditorScene extends Scene {
         glEnableVertexAttribArray(1);
     }
 
-    // returns the shaderID
-    private int compileShader(int shaderType, String shaderSrc) {
-        // First: Load and compile vertex shader.
-        int shaderID = glCreateShader(shaderType);
-        // Pass Shader source to the GPU
-        glShaderSource(shaderID, shaderSrc);
-        glCompileShader(shaderID);
-
-        // Check for errors in compilation
-        if (glGetShaderi(shaderID, GL_COMPILE_STATUS) == GL_FALSE) {
-            int infoLogLen = glGetShaderi(shaderID, GL_INFO_LOG_LENGTH);
-            System.out.printf("ERROR: 'defaultShader.glsl'\n\tShader '%s' compilation failed.", glGetShaderi(shaderID, GL_SHADER_TYPE));
-            System.out.println(glGetShaderInfoLog(shaderID)); // TODO Is there a diff when using length of infoLog?
-            System.out.println(glGetShaderInfoLog(shaderID, infoLogLen));
-            assert false : "";
-        }
-        return shaderID;
-    }
-
     @Override
     public void update(double deltaTime) {
-        // Bind shader program
-        glUseProgram(shaderProgramID);
+        defaultShader = new Shader("D:\\cmasenv\\workspace\\java\\Andreol-Engine\\assets\\shaders\\default.glsl");
+        defaultShader.compileAndLink();
+
+        defaultShader.use();
         // Bind the VAO we're using
         glBindVertexArray(vaoID);
 
@@ -182,6 +123,6 @@ public class LevelEditorScene extends Scene {
         glDisableVertexAttribArray(1);
 
         glBindVertexArray(0); // '0' means bind to nothing.
-        glUseProgram(0); // Same as above.
+        defaultShader.detach();
     }
 }
