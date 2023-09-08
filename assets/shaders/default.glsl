@@ -1,4 +1,3 @@
-// Defining the Vertex shader
 #type vertex
 #version 330 core
 // - The 'a' prefix stands for attribute, as in vertex attribute.
@@ -17,7 +16,6 @@ void main() {
     gl_Position = vec4(aPos, 1.0);
 }
 
-// Defining the Fragment shader
 #type fragment
 #version 330 core
 
