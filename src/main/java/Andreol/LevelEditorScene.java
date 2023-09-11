@@ -1,5 +1,6 @@
 package Andreol;
 
+import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 import renderer.Shader;
 
@@ -23,10 +24,10 @@ public class LevelEditorScene extends Scene {
 //        .5f, .5f, .0f,      .0f, .0f, 1.0f, 1.0f, // Top right 2
 //        -.5f, -.5f, 0f,     1.0f, 1.0f, .0f, 1.0f // Bottom left 3
 
-            .5f, -.5f, .0f,     .0f, 1.0f, .0f, 1.0f, // Bottom right 0
-            -.5f, .5f, .0f,     .0f, 1.0f, .0f, 1.0f, // Top left 1
-            .5f, .5f, .0f,      1.0f, .0f, 1.0f, 1.0f, // Top right 2
-            -.5f, -.5f, 0f,     1.0f, .0f, 1.0f, 1.0f // Bottom left 3
+            100f, 0f, .0f,     .0f, 1.0f, .0f, 1.0f, // Bottom right 0
+            0f, 100f, .0f,     .0f, 1.0f, .0f, 1.0f, // Top left 1
+            100f, 100f, .0f,      1.0f, .0f, 1.0f, 1.0f, // Top right 2
+            0f, 0f, 0f,     1.0f, .0f, 1.0f, 1.0f // Bottom left 3
     };
 
     /*
@@ -55,11 +56,19 @@ public class LevelEditorScene extends Scene {
 
     private int vaoID, vboID, eboID;
 
+    // NOT IMPORTANT, JUST FOR SCREENSAVER
+    float cameraMoveVelocityX = 400.0f;
+    float cameraMoveVelocityY = 300.0f;
+
     public LevelEditorScene() {
 
     }
 
     public void init() {
+        this.camera = new Camera(new Vector2f());
+        defaultShader = new Shader("D:\\cmasenv\\workspace\\java\\Andreol-Engine\\assets\\shaders\\default.glsl");
+        defaultShader.compileAndLink();
+
         // ==========================================================
         // Generate VAO, VBO, and EBO buffer objects, and send to GPU
         // ==========================================================
@@ -98,17 +107,16 @@ public class LevelEditorScene extends Scene {
         //      layout (location=1) in vec4 aColor;
         glVertexAttribPointer(0, positionsSize, GL_FLOAT, false, vertexSizeBytes, 0);
         glEnableVertexAttribArray(0);
-
         glVertexAttribPointer(1, colorSize, GL_FLOAT, false, vertexSizeBytes, positionsSize * floatSizeBytes);
         glEnableVertexAttribArray(1);
     }
 
     @Override
     public void update(double deltaTime) {
-        defaultShader = new Shader("D:\\cmasenv\\workspace\\java\\Andreol-Engine\\assets\\shaders\\default.glsl");
-        defaultShader.compileAndLink();
-
+        screenSaver(deltaTime);
         defaultShader.use();
+        defaultShader.uploadMat4f("uProjection", camera.getProjectionMatrix());
+        defaultShader.uploadMat4f("uView", camera.getViewMatrix());
         // Bind the VAO we're using
         glBindVertexArray(vaoID);
 
@@ -124,5 +132,25 @@ public class LevelEditorScene extends Scene {
 
         glBindVertexArray(0); // '0' means bind to nothing.
         defaultShader.detach();
+    }
+
+    // JUST FOR FUN, NOT IMPORTANT!
+    // NOTE: It is the Camera moving, not the box.
+    private void screenSaver(double deltaTime) {
+        // -32f * 40f = SCREEN WIDTH
+        // 100f = WIDTH OF OBJECT
+        if ((cameraMoveVelocityX > 0 && camera.position.x - deltaTime * cameraMoveVelocityX < (-32f * 40f) + 100f) ||
+                (cameraMoveVelocityX < 0 && camera.position.x - deltaTime * cameraMoveVelocityX > 0f)) {
+            cameraMoveVelocityX *= -1;
+        }
+        // -32f * 21f = SCREEN HEIGHT
+        // 100f = HEIGHT OF OBJECT
+        if ((cameraMoveVelocityY > 0 && camera.position.y - deltaTime * cameraMoveVelocityY < (-32f * 21) + 100f) ||
+                (cameraMoveVelocityY < 0 && camera.position.y - deltaTime * cameraMoveVelocityY > 0f)) {
+            cameraMoveVelocityY *= -1;
+        }
+
+        camera.position.x -= deltaTime * cameraMoveVelocityX;
+        camera.position.y -= deltaTime * cameraMoveVelocityY;
     }
 }
