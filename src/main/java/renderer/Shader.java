@@ -91,6 +91,7 @@ public class Shader {
         glUseProgram(0); // '0' means bind to nothing.
     }
 
+    // Must be called after 'shader.use()' as it needs an existing shader.
     public void uploadMat4f(String varName, Matrix4f mat4f) {
         int varLocation = glGetUniformLocation(shaderProgramID, varName);
         // Capacity is 16 as it's a 4x4 matrix.
