@@ -16,6 +16,8 @@ void main() {
     // - gl_Position specifically MUST be defined.
     // - The vector4 uses the 3 values from aPos and 1.0 as the
     // 4th value.
+    // - This calculation is used to determine the NDC (Normalized Device Cooridnates):
+    //      projectionMatrix * viewMatrix * worldCoordinates = NDC
     gl_Position = uProjection * uView * vec4(aPos, 1.0);
 }
 
