@@ -1,6 +1,8 @@
 #type vertex
 #version 330 core
 // - The 'a' prefix stands for attribute, as in vertex attribute.
+// - These locations map to the VAO attributes defined in LevelEditorScene
+// with glVertexAttribPointer(), which itself uses these location values.
 layout (location=0) in vec3 aPos;
 layout (location=1) in vec4 aColor;
 
