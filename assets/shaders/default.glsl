@@ -34,12 +34,33 @@ void main() {
 #type fragment
 #version 330 core
 
+uniform float uTime;
+
 in vec4 fColor;
 
 // - I THINK this is the one output for the fragment shader and is passed to the next
 // stage in the graphics pipeline.
 out vec4 color;
 
+// Transforms the object to a black and white version.
+void blackAndWhite() {
+    float avg = (fColor.r + fColor.g, fColor.b) / 3;
+    color = vec4(avg, avg, avg, 1);
+}
+
+// Fluctuates brightness using a sin wave.
+void colorFluctuation() {
+    color = sin(uTime) * fColor;
+}
+
+// Uses noise to distort object colors
+// Details here: http://science-and-fiction.org/rendering/noise.html
+// Above link also has details about Perlin Noise.
+void noiseify() {
+    float noise = fract(sin(dot(fColor.xy, vec2(12.9898,78.233))) * 43758.5453);
+    color = fColor * noise;
+}
+
 void main() {
-    color = fColor;
+    noiseify();
 }
