@@ -21,10 +21,10 @@ public class LevelEditorScene extends Scene {
     // 1 (left to right, down to up, back to forward)
     private float[] vertexArray = {
         // position         // color                // uv coordinates
-        100f, 0f, .0f,      .0f, 1.0f, .0f, 1.0f,   1, 0,               // Bottom right 0
-        0f, 100f, .0f,      .0f, 1.0f, .0f, 1.0f,   0, 1,               // Top left 1
-        100f, 100f, .0f,    1.0f, .0f, 1.0f, 1.0f,  1, 1,               // Top right 2
-        0f, 0f, 0f,         1.0f, .0f, 1.0f, 1.0f,  0, 0                // Bottom left 3
+        1130, 0, .0f,      .0f, 1.0f, .0f, 1.0f,   1, 0,               // Bottom right 0
+        130, 750, .0f,      .0f, 1.0f, .0f, 1.0f,   0, 1,               // Top left 1
+        1130, 750, .0f,      1.0f, .0f, 1.0f, 1.0f,  1, 1,               // Top right 2
+        130, 0, 0f,         1.0f, .0f, 1.0f, 1.0f,  0, 0                // Bottom left 3
     };
 
     /*
@@ -142,6 +142,7 @@ public class LevelEditorScene extends Scene {
 
         glBindVertexArray(0); // '0' means bind to nothing.
         defaultShader.detach();
+        testTexture.unbind();
     }
 
     // JUST FOR FUN, NOT IMPORTANT!
