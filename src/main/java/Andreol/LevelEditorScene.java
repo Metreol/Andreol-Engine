@@ -3,6 +3,7 @@ package Andreol;
 import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 import renderer.Shader;
+import renderer.Texture;
 import util.Time;
 
 import java.nio.FloatBuffer;
@@ -19,16 +20,11 @@ public class LevelEditorScene extends Scene {
     // - IMPORTANT: Positions are normalised, so x and y are between -1 and
     // 1 (left to right, down to up, back to forward)
     private float[] vertexArray = {
-        // position         // color
-//        .5f, -.5f, .0f,     1.0f, .0f, .0f, 1.0f, // Bottom right 0
-//        -.5f, .5f, .0f,     .0f, 1.0f, .0f, 1.0f, // Top left 1
-//        .5f, .5f, .0f,      .0f, .0f, 1.0f, 1.0f, // Top right 2
-//        -.5f, -.5f, 0f,     1.0f, 1.0f, .0f, 1.0f // Bottom left 3
-
-            100f, 0f, .0f,     .0f, 1.0f, .0f, 1.0f, // Bottom right 0
-            0f, 100f, .0f,     .0f, 1.0f, .0f, 1.0f, // Top left 1
-            100f, 100f, .0f,      1.0f, .0f, 1.0f, 1.0f, // Top right 2
-            0f, 0f, 0f,     1.0f, .0f, 1.0f, 1.0f // Bottom left 3
+        // position         // color                // uv coordinates
+        100f, 0f, .0f,      .0f, 1.0f, .0f, 1.0f,   1, 0,               // Bottom right 0
+        0f, 100f, .0f,      .0f, 1.0f, .0f, 1.0f,   0, 1,               // Top left 1
+        100f, 100f, .0f,    1.0f, .0f, 1.0f, 1.0f,  1, 1,               // Top right 2
+        0f, 0f, 0f,         1.0f, .0f, 1.0f, 1.0f,  0, 0                // Bottom left 3
     };
 
     /*
@@ -57,6 +53,8 @@ public class LevelEditorScene extends Scene {
 
     private int vaoID, vboID, eboID;
 
+    private Texture testTexture;
+
     // NOT IMPORTANT, JUST FOR SCREENSAVER
     float cameraMoveVelocityX = 400.0f;
     float cameraMoveVelocityY = 300.0f;
@@ -67,8 +65,9 @@ public class LevelEditorScene extends Scene {
 
     public void init() {
         this.camera = new Camera(new Vector2f());
-        defaultShader = new Shader("D:\\cmasenv\\workspace\\java\\Andreol-Engine\\assets\\shaders\\default.glsl");
+        defaultShader = new Shader("assets/shaders/default.glsl");
         defaultShader.compileAndLink(); // Move this into constructor?
+        this.testTexture = new Texture("assets/images/testImage.png");
 
         // ==========================================================
         // Generate VAO, VBO, and EBO buffer objects, and send to GPU
@@ -98,10 +97,11 @@ public class LevelEditorScene extends Scene {
         // Add the vertex attribute pointers
         int positionsSize = 3; // x, y, z
         int colorSize = 4; // r, g, b, a
+        int uvCoordsSize = 2; //
         // You have to tell the GPU the size of the data you are passing, in this case
         // it's all floats and floats are 4 bytes
-        int floatSizeBytes = 4;
-        int vertexSizeBytes = (positionsSize + colorSize) * floatSizeBytes;
+        int floatSizeBytes = Float.BYTES;
+        int vertexSizeBytes = (positionsSize + colorSize + uvCoordsSize) * floatSizeBytes;
         // The 1st param, index, is the index (location) defined in the shaders.
         // See strings above or default.glsl, specifically:
         //      layout (location=0) in vec3 aPos;
@@ -110,12 +110,20 @@ public class LevelEditorScene extends Scene {
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(1, colorSize, GL_FLOAT, false, vertexSizeBytes, positionsSize * floatSizeBytes);
         glEnableVertexAttribArray(1);
+        glVertexAttribPointer(2, colorSize, GL_FLOAT, false, vertexSizeBytes, (positionsSize + colorSize) * floatSizeBytes);
+        glEnableVertexAttribArray(2);
     }
 
     @Override
     public void update(double deltaTime) {
-        screenSaver(deltaTime);
+        //screenSaver(deltaTime);
         defaultShader.use();
+
+        // Upload Texture to Shader
+        defaultShader.uploadTexture("TEXTURE_SAMPLER", 0);
+        glActiveTexture(GL_TEXTURE0);
+        testTexture.bind();
+
         defaultShader.uploadMat4f("uProjection", camera.getProjectionMatrix());
         defaultShader.uploadMat4f("uView", camera.getViewMatrix());
         defaultShader.uploadFloat("uTime", Time.getTimeFloat());
