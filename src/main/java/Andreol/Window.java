@@ -42,10 +42,12 @@ public class Window {
             case 0:
                 currentScene = new LevelEditorScene();
                 currentScene.init();
+                currentScene.start();
                 break;
             case 1:
                 currentScene = new LevelScene();
                 currentScene.init();
+                currentScene.start();
                 break;
             default:
                 assert false : "Unknown scene index: " + sceneIndex;
@@ -119,9 +121,9 @@ public class Window {
     }
 
     public void loop() {
-        double frameStartTime = Time.getTime();
-        double frameEndTime;
-        double deltaTime = -1d;
+        float frameStartTime = (float) Time.getTime();
+        float frameEndTime;
+        float deltaTime = -1f;
         while (!glfwWindowShouldClose(glfwWindow)) {
             // Poll events
             glfwPollEvents();
@@ -139,7 +141,7 @@ public class Window {
 
             glfwSwapBuffers(glfwWindow);
 
-            frameEndTime = Time.getTime();
+            frameEndTime = (float) Time.getTime();
             deltaTime = frameEndTime - frameStartTime;
             framesPerSecond = 1D / deltaTime;
             // Better to set startTime here as any interrupts between frames will

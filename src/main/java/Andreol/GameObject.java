@@ -1,5 +1,6 @@
 package Andreol;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GameObject {
@@ -7,6 +8,7 @@ public class GameObject {
     private List<Component> components;
     public GameObject(String name) {
         this.name = name;
+        this.components = new ArrayList<>();
     }
 
     public void start() {

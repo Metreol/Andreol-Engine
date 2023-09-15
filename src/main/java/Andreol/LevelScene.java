@@ -17,7 +17,7 @@ public class LevelScene extends Scene {
     }
 
     @Override
-    public void update(double deltaTime) {
+    public void update(float deltaTime) {
         if (!changingScene && KeyListener.isKeyPressed(KeyEvent.VK_SPACE)) {
             changingScene = true;
             sceneTransitionTimeRemaining = sceneTransitionTimeTotal;

@@ -1,5 +1,7 @@
 package Andreol;
 
+import components.FontRenderer;
+import components.SpriteRenderer;
 import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 import renderer.Shader;
@@ -14,7 +16,6 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 public class LevelEditorScene extends Scene {
-
     // This is the data we'll use to create the VBO: Vertex Buffer Object
     // - This defines the vertices in terms of their attributes (coordinates, color, etc)
     // - IMPORTANT: Positions are normalised, so x and y are between -1 and
@@ -26,7 +27,6 @@ public class LevelEditorScene extends Scene {
         1130, 750, .0f,      1.0f, .0f, 1.0f, 1.0f,  1, 1,               // Top right 2
         130, 0, 0f,         1.0f, .0f, 1.0f, 1.0f,  0, 0                // Bottom left 3
     };
-
     /*
     This is the data we'll use to create the EBO: Element Buffer Object.
     - This describes where the vertices are in the VBO above.
@@ -48,12 +48,10 @@ public class LevelEditorScene extends Scene {
             2, 1, 0, // Top Right Triangle (Could this be 0,2,1 or 1,0,2?)
             0, 1, 3 // Bottom Left Triangle (Could this be 1,3,0 or 3,0,1?)
     };
-
     private Shader defaultShader;
-
     private int vaoID, vboID, eboID;
-
     private Texture testTexture;
+    private GameObject testObject;
 
     // NOT IMPORTANT, JUST FOR SCREENSAVER
     float cameraMoveVelocityX = 400.0f;
@@ -64,6 +62,12 @@ public class LevelEditorScene extends Scene {
     }
 
     public void init() {
+        System.out.println("Creating test object");
+        this.testObject = new GameObject("test object");
+        this.testObject.addComponent(new SpriteRenderer());
+        this.testObject.addComponent(new FontRenderer());
+        this.addGameObjectToScene(this.testObject);
+
         this.camera = new Camera(new Vector2f());
         defaultShader = new Shader("assets/shaders/default.glsl");
         defaultShader.compileAndLink(); // Move this into constructor?
@@ -115,7 +119,7 @@ public class LevelEditorScene extends Scene {
     }
 
     @Override
-    public void update(double deltaTime) {
+    public void update(float deltaTime) {
         //screenSaver(deltaTime);
         defaultShader.use();
 
@@ -143,6 +147,15 @@ public class LevelEditorScene extends Scene {
         glBindVertexArray(0); // '0' means bind to nothing.
         defaultShader.detach();
         testTexture.unbind();
+
+        GameObject gameObject = new GameObject("test object 2");
+        gameObject.addComponent(new SpriteRenderer());
+        this.addGameObjectToScene(gameObject);
+
+
+        for (GameObject go : this.gameObjects) {
+            go.update(deltaTime);
+        }
     }
 
     // JUST FOR FUN, NOT IMPORTANT!
