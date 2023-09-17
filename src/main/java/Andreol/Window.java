@@ -56,6 +56,10 @@ public class Window {
         }
     }
 
+    public Scene getCurrentScene() {
+        return currentScene;
+    }
+
     public static Window get() {
         if (window == null) {
             window = new Window();
